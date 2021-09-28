@@ -102,7 +102,6 @@ func (s *Servidor) MostrarTodosLosMensajes() {
 	}
 }
 
-
 func (s *Servidor) RespaldarMensajes() {
 	mensajes := []string{}
 	for _, m := range s.Chats {
