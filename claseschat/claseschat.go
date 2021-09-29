@@ -28,7 +28,7 @@ type Mensaje struct {
 }
 
 func (m *Mensaje) MostrarMensajeRecibidos() {
-	fmt.Println(m.DiaEnvio, " De: ", m.Enviador, " | ", m.Contenido)
+	fmt.Println(m.DiaEnvio, " De: ", m.Enviador, " | ", m.Contenido, m.Archivo.NombreArchivo)
 }
 
 func (m *Mensaje) MostrarMensajeEnviados() {
@@ -48,9 +48,16 @@ func (m *Mensaje) MensajeConFormato() string {
 //Ususario
 /////////////////////////////////////////////////////////////////////////////////////
 type Usuario struct {
-	Nombre    string
-	Conectado int
-	Conexion  net.Conn
+	Nombre            string
+	Conectado         int
+	Conexion          net.Conn
+	MensajesRecibidos []Mensaje
+}
+
+func (u *Usuario) MostarMensajesRecibidos() {
+	for _, f := range u.MensajesRecibidos {
+		f.MostrarMensajeRecibidos()
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

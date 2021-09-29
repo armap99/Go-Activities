@@ -38,6 +38,16 @@ func handleClient(c net.Conn, servidor *claseschat.Servidor) { // se agrega al u
 		msg.Conexion = c
 		servidor.Usuarios = append(servidor.Usuarios, msg)
 	}
+	for {
+		var mensaje claseschat.Mensaje
+		err := gob.NewDecoder(c).Decode(&mensaje)
+		if err != nil {
+			fmt.Println(err)
+			return
+		} else {
+			fmt.Println(mensaje.Contenido, mensaje.Destinatario, mensaje.Enviador)
+		}
+	}
 
 }
 
