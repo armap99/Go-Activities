@@ -39,20 +39,24 @@ func handleClient(c net.Conn, servidor *claseschat.Servidor) { // se agrega al u
 		servidor.Usuarios = append(servidor.Usuarios, msg)
 	}
 	for {
-		var mensaje claseschat.Mensaje
+		mensaje := new(claseschat.Mensaje)
 		err := gob.NewDecoder(c).Decode(&mensaje)
 		if err != nil {
 			fmt.Println(err)
 			return
 		} else {
+
 			fmt.Println("Mensaje enviado: [ ", mensaje.Enviador, " | ", mensaje.Destinatario, " ] ")
+			if mensaje.ArchivoE.Longitud != 0 {
+				fmt.Println("Archivo: ", mensaje.ArchivoE.NombreArchivo)
+			}
 			EnviarMensaje(mensaje, servidor)
 		}
 	}
 
 }
 
-func EnviarMensaje(msg claseschat.Mensaje, servidor *claseschat.Servidor) {
+func EnviarMensaje(msg *claseschat.Mensaje, servidor *claseschat.Servidor) {
 	var aux net.Conn
 	for _, f := range servidor.Usuarios {
 		if f.Nombre == msg.Destinatario {

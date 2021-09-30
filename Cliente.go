@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 
 	"./claseschat"
 )
@@ -55,10 +56,12 @@ func MenuUsuario(c net.Conn, usuario *claseschat.Usuario) {
 		fmt.Println("1-Enviar mensaje de texto ")
 		fmt.Println("2-Enviar archivo ")
 		fmt.Println("3-Mostrar mensajes recibidos ")
+		fmt.Println("4-Salir ")
 		fmt.Scan(&opcliente)
 		if opcliente == 1 {
 			mensaje := new(claseschat.Mensaje)
 			mensaje.Enviador = usuario.Nombre
+			mensaje.DiaEnvio = time.Now()
 			var destinatario string
 			var contendio string
 			fmt.Println("A quien quieres enviar el mensaje: ")
@@ -70,6 +73,18 @@ func MenuUsuario(c net.Conn, usuario *claseschat.Usuario) {
 			MandarMensaje(c, mensaje)
 
 		} else if opcliente == 2 {
+			mensajeArchivo := new(claseschat.Mensaje)
+			mensajeArchivo.Enviador = usuario.Nombre
+			mensajeArchivo.DiaEnvio = time.Now()
+			var destinatarioArchivo string
+			var nombreArchivo string
+			fmt.Println("A quien quieres enviar el mensaje: ")
+			fmt.Scan(&destinatarioArchivo)
+			mensajeArchivo.Destinatario = destinatarioArchivo
+			fmt.Println("Nombre del archivo: ")
+			nombreArchivo = obtenercadenaespacios()
+			mensajeArchivo.ArchivoE.NombreArchivo = nombreArchivo
+			MandarArchivo(c, mensajeArchivo)
 
 		} else if opcliente == 3 {
 			usuario.MostarMensajesRecibidos()
@@ -89,19 +104,65 @@ func MandarMensaje(conexion net.Conn, mensaje *claseschat.Mensaje) {
 
 }
 
+func MandarArchivo(conexion net.Conn, mensaje *claseschat.Mensaje) { //sacar toda la info del archivo antes de mandar
+	f, err := os.Open(mensaje.ArchivoE.NombreArchivo)
+	if err != nil {
+		fmt.Println("No se encontro el archivo, intenta de nuevo")
+		return
+	}
+	defer f.Close()
+	stat, err := f.Stat()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	total := stat.Size()
+	bs := make([]byte, total) //byts
+	count, err := f.Read(bs)  //tamano
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	mensaje.ArchivoE.Longitud = count
+	mensaje.ArchivoE.Bytes = bs
+	err = gob.NewEncoder(conexion).Encode(mensaje)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+}
+
 func EsperandoMensajes(c net.Conn, usuario *claseschat.Usuario) {
-	var msgs claseschat.Mensaje
 	for {
+		var msgs claseschat.Mensaje
 		err := gob.NewDecoder(c).Decode(&msgs)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		} else {
 			usuario.MensajesRecibidos = append(usuario.MensajesRecibidos, msgs)
+			if msgs.ArchivoE.Longitud != 0 {
+				decofificarArchivo(msgs)
+			}
 			msgs.MostrarMensajeRecibidos()
 		}
 
 	}
+}
+
+func decofificarArchivo(mensaje claseschat.Mensaje) {
+	f, err := os.Create("Para_" + mensaje.Destinatario + "-" + "De_" + mensaje.Enviador + "_" + mensaje.ArchivoE.NombreArchivo)
+	if err != nil {
+		fmt.Println("Algo salio mal: Defodificador de archivo")
+		return
+	}
+	defer f.Close()
+
+	_, err = f.Write(mensaje.ArchivoE.Bytes)
+	if err != nil {
+		fmt.Println("Algo salio mal", err.Error())
+		return
+	}
+
 }
 
 func main() {

@@ -23,24 +23,24 @@ type Mensaje struct {
 	Enviador     string
 	Destinatario string
 	Contenido    string
-	Archivo      Archivo
+	ArchivoE     Archivo
 	DiaEnvio     time.Time
 }
 
 func (m *Mensaje) MostrarMensajeRecibidos() {
-	fmt.Println(m.DiaEnvio, " De: ", m.Enviador, " | ", m.Contenido, m.Archivo.NombreArchivo)
+	fmt.Println(m.DiaEnvio.Format("06-Jan-02"), " De: ", m.Enviador, " | ", m.Contenido, m.ArchivoE.NombreArchivo)
 }
 
 func (m *Mensaje) MostrarMensajeEnviados() {
-	fmt.Println("            ", m.DiaEnvio, " De: ", m.Enviador, " | ", m.Contenido)
+	fmt.Println("            ", m.DiaEnvio.Format("06-Jan-02"), " De: ", m.Enviador, " | ", m.Contenido)
 }
 
 func (m *Mensaje) MostrarMensajeNormal() {
-	fmt.Println(m.DiaEnvio, " De: ", m.Enviador, " Para : ", m.Destinatario, " Contenido: ", m.Contenido, m.Archivo.NombreArchivo)
+	fmt.Println(m.DiaEnvio.Format("06-Jan-02"), " De: ", m.Enviador, " Para : ", m.Destinatario, " Contenido: ", m.Contenido, m.ArchivoE.NombreArchivo)
 }
 
 func (m *Mensaje) MensajeConFormato() string {
-	aux := m.DiaEnvio.Format("18-May-99") + "Enviado : " + m.Enviador + " Destinatario: " + m.Destinatario + "Contenido: " + m.Contenido + m.Archivo.NombreArchivo
+	aux := m.DiaEnvio.Format("06-Jan-02") + "Enviado : " + m.Enviador + " Destinatario: " + m.Destinatario + "Contenido: " + m.Contenido + m.ArchivoE.NombreArchivo
 	return aux
 }
 
@@ -102,8 +102,8 @@ func (s *Servidor) Conectados() {
 }
 
 func (s *Servidor) MostrarTodosLosMensajes() {
-	for _, f := range s.Chats {
-		for _, w := range f.Mensajes {
+	for _, f := range s.Usuarios {
+		for _, w := range f.MensajesRecibidos {
 			w.MostrarMensajeNormal()
 		}
 	}
@@ -111,8 +111,8 @@ func (s *Servidor) MostrarTodosLosMensajes() {
 
 func (s *Servidor) RespaldarMensajes() {
 	mensajes := []string{}
-	for _, m := range s.Chats {
-		for _, w := range m.Mensajes {
+	for _, m := range s.Usuarios {
+		for _, w := range m.MensajesRecibidos {
 			mensajes = append(mensajes, w.MensajeConFormato())
 		}
 
