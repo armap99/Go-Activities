@@ -45,10 +45,24 @@ func handleClient(c net.Conn, servidor *claseschat.Servidor) { // se agrega al u
 			fmt.Println(err)
 			return
 		} else {
-			fmt.Println(mensaje.Contenido, mensaje.Destinatario, mensaje.Enviador)
+			fmt.Println("Mensaje enviado: [ ", mensaje.Enviador, " | ", mensaje.Destinatario, " ] ")
+			EnviarMensaje(mensaje, servidor)
 		}
 	}
 
+}
+
+func EnviarMensaje(msg claseschat.Mensaje, servidor *claseschat.Servidor) {
+	var aux net.Conn
+	for _, f := range servidor.Usuarios {
+		if f.Nombre == msg.Destinatario {
+			aux = f.Conexion
+		}
+	}
+	err := gob.NewEncoder(aux).Encode(msg)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func main() {

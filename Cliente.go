@@ -89,10 +89,26 @@ func MandarMensaje(conexion net.Conn, mensaje *claseschat.Mensaje) {
 
 }
 
+func EsperandoMensajes(c net.Conn, usuario *claseschat.Usuario) {
+	var msgs claseschat.Mensaje
+	for {
+		err := gob.NewDecoder(c).Decode(&msgs)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		} else {
+			usuario.MensajesRecibidos = append(usuario.MensajesRecibidos, msgs)
+			msgs.MostrarMensajeRecibidos()
+		}
+
+	}
+}
+
 func main() {
 	conexion := conexion()
 	usuario := CrearUsuario()
 	regresarUsuario(conexion, usuario)
+	go EsperandoMensajes(conexion, usuario)
 	MenuUsuario(conexion, usuario)
 
 	var input string
