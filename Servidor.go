@@ -58,9 +58,10 @@ func handleClient(c net.Conn, servidor *claseschat.Servidor) { // se agrega al u
 
 func EnviarMensaje(msg *claseschat.Mensaje, servidor *claseschat.Servidor) {
 	var aux net.Conn
-	for _, f := range servidor.Usuarios {
-		if f.Nombre == msg.Destinatario {
-			aux = f.Conexion
+	for i := 0; i < len(servidor.Usuarios); i++ {
+		if servidor.Usuarios[i].Nombre == msg.Destinatario {
+			aux = servidor.Usuarios[i].Conexion
+			servidor.Usuarios[i].MensajesRecibidos = append(servidor.Usuarios[i].MensajesRecibidos, *msg)
 		}
 	}
 	err := gob.NewEncoder(aux).Encode(msg)

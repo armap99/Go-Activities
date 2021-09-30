@@ -41,8 +41,8 @@ func CrearUsuario() *claseschat.Usuario {
 }
 
 func regresarUsuario(c net.Conn, usuario *claseschat.Usuario) {
-	//msg := usuario
-	err := gob.NewEncoder(c).Encode(usuario)
+	msg := usuario
+	err := gob.NewEncoder(c).Encode(msg)
 	if err != nil {
 		fmt.Println(err)
 	}

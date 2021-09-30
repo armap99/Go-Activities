@@ -40,7 +40,7 @@ func (m *Mensaje) MostrarMensajeNormal() {
 }
 
 func (m *Mensaje) MensajeConFormato() string {
-	aux := m.DiaEnvio.Format("06-Jan-02") + "Enviado : " + m.Enviador + " Destinatario: " + m.Destinatario + "Contenido: " + m.Contenido + m.ArchivoE.NombreArchivo
+	aux := m.DiaEnvio.Format("06-Jan-02") + " Enviado: " + m.Enviador + " Destinatario: " + m.Destinatario + "Contenido: " + m.Contenido + m.ArchivoE.NombreArchivo
 	return aux
 }
 
