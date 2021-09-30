@@ -87,7 +87,7 @@ func MenuUsuario(c net.Conn, usuario *claseschat.Usuario) {
 			MandarArchivo(c, mensajeArchivo)
 
 		} else if opcliente == 3 {
-			usuario.MostarMensajesRecibidos()
+			usuario.MostrarConChat()
 
 		} else if opcliente == 4 {
 			return

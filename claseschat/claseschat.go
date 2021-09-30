@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -54,10 +55,34 @@ type Usuario struct {
 	MensajesRecibidos []Mensaje
 }
 
-func (u *Usuario) MostarMensajesRecibidos() {
+type sortByEnviador []Mensaje
+
+func (a sortByEnviador) Len() int           { return len(a) }
+func (a sortByEnviador) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a sortByEnviador) Less(i, j int) bool { return a[i].Enviador < a[j].Enviador }
+
+func (u *Usuario) MostarMensajesRecibidos() { //poner bonito
 	for _, f := range u.MensajesRecibidos {
 		f.MostrarMensajeRecibidos()
 	}
+}
+
+func (u *Usuario) MostrarConChat() {
+	auxl := u.MensajesRecibidos
+	sort.Sort(sortByEnviador(auxl))
+	var Enviador string
+	Enviador = auxl[0].Enviador
+	fmt.Println("Mensajes enviados por " + Enviador)
+	for j := 0; j < len(auxl); j++ {
+		if auxl[j].Enviador == Enviador {
+			auxl[j].MostrarMensajeRecibidos()
+		} else {
+			Enviador = auxl[j].Enviador
+			fmt.Println("Mensajes enviados por " + Enviador)
+			auxl[j].MostrarMensajeRecibidos()
+		}
+	}
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
