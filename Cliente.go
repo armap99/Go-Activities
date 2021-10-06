@@ -56,7 +56,9 @@ func MenuUsuario(c net.Conn, usuario *claseschat.Usuario) {
 		fmt.Println("1-Enviar mensaje de texto ")
 		fmt.Println("2-Enviar archivo ")
 		fmt.Println("3-Mostrar mensajes recibidos ")
-		fmt.Println("4-Salir ")
+		fmt.Println("4-Enviar mensaje de texto general ")
+		fmt.Println("5-Enviar archivo general ")
+		fmt.Println("6-Salir ")
 		fmt.Scan(&opcliente)
 		if opcliente == 1 {
 			mensaje := new(claseschat.Mensaje)
@@ -90,6 +92,28 @@ func MenuUsuario(c net.Conn, usuario *claseschat.Usuario) {
 			usuario.MostrarConChat()
 
 		} else if opcliente == 4 {
+			mensaje := new(claseschat.Mensaje)
+			mensaje.Enviador = usuario.Nombre
+			mensaje.DiaEnvio = time.Now()
+			var contendio string
+			mensaje.Destinatario = "Todos"
+			fmt.Println("Texto: ")
+			contendio = obtenercadenaespacios()
+			mensaje.Contenido = contendio
+			MandarMensaje(c, mensaje)
+
+		} else if opcliente == 5 {
+			mensajeArchivo := new(claseschat.Mensaje)
+			mensajeArchivo.Enviador = usuario.Nombre
+			mensajeArchivo.DiaEnvio = time.Now()
+			var nombreArchivo string
+			mensajeArchivo.Destinatario = "Todos"
+			fmt.Println("Nombre del archivo: ")
+			nombreArchivo = obtenercadenaespacios()
+			mensajeArchivo.ArchivoE.NombreArchivo = nombreArchivo
+			MandarArchivo(c, mensajeArchivo)
+
+		} else if opcliente == 6 {
 			return
 		}
 	}
@@ -141,7 +165,7 @@ func EsperandoMensajes(c net.Conn, usuario *claseschat.Usuario) {
 		} else {
 			usuario.MensajesRecibidos = append(usuario.MensajesRecibidos, msgs)
 			if msgs.ArchivoE.Longitud != 0 {
-				decofificarArchivo(msgs)
+				decofificarArchivo(msgs, usuario)
 			}
 			msgs.MostrarMensajeRecibidos()
 		}
@@ -149,18 +173,33 @@ func EsperandoMensajes(c net.Conn, usuario *claseschat.Usuario) {
 	}
 }
 
-func decofificarArchivo(mensaje claseschat.Mensaje) {
-	f, err := os.Create("Para_" + mensaje.Destinatario + "-" + "De_" + mensaje.Enviador + "_" + mensaje.ArchivoE.NombreArchivo)
-	if err != nil {
-		fmt.Println("Algo salio mal: Defodificador de archivo")
-		return
-	}
-	defer f.Close()
+func decofificarArchivo(mensaje claseschat.Mensaje, usuario *claseschat.Usuario) {
+	if mensaje.Destinatario == "Todos" {
+		f, err := os.Create("Para_" + usuario.Nombre + "-" + "De_" + mensaje.Enviador + "_" + mensaje.ArchivoE.NombreArchivo)
+		if err != nil {
+			fmt.Println("Algo salio mal: Defodificador de archivo")
+			return
+		}
+		defer f.Close()
 
-	_, err = f.Write(mensaje.ArchivoE.Bytes)
-	if err != nil {
-		fmt.Println("Algo salio mal", err.Error())
-		return
+		_, err = f.Write(mensaje.ArchivoE.Bytes)
+		if err != nil {
+			fmt.Println("Algo salio mal", err.Error())
+			return
+		}
+	} else {
+		f, err := os.Create("Para_" + mensaje.Destinatario + "-" + "De_" + mensaje.Enviador + "_" + mensaje.ArchivoE.NombreArchivo)
+		if err != nil {
+			fmt.Println("Algo salio mal: Defodificador de archivo")
+			return
+		}
+		defer f.Close()
+
+		_, err = f.Write(mensaje.ArchivoE.Bytes)
+		if err != nil {
+			fmt.Println("Algo salio mal", err.Error())
+			return
+		}
 	}
 
 }

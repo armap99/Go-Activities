@@ -20,9 +20,6 @@ func servidor(lservidor *claseschat.Servidor) {
 			fmt.Println(err)
 			continue
 		}
-		//msg := lprocesos.Primero()
-		//err = gob.NewEncoder(cliente).Encode(msg)//mando al cliente
-
 		go handleClient(cliente, lservidor)
 	}
 }
@@ -50,7 +47,12 @@ func handleClient(c net.Conn, servidor *claseschat.Servidor) { // se agrega al u
 			if mensaje.ArchivoE.Longitud != 0 {
 				fmt.Println("Archivo: ", mensaje.ArchivoE.NombreArchivo)
 			}
-			EnviarMensaje(mensaje, servidor)
+			if mensaje.Destinatario != "Todos" {
+				EnviarMensaje(mensaje, servidor)
+			} else {
+				EnviarMensajeGeneral(mensaje, servidor)
+			}
+
 		}
 	}
 
@@ -68,6 +70,21 @@ func EnviarMensaje(msg *claseschat.Mensaje, servidor *claseschat.Servidor) {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func EnviarMensajeGeneral(msg *claseschat.Mensaje, servidor *claseschat.Servidor) {
+	var aux net.Conn
+	for i := 0; i < len(servidor.Usuarios); i++ {
+		if servidor.Usuarios[i].Nombre != msg.Enviador {
+			aux = servidor.Usuarios[i].Conexion
+			servidor.Usuarios[i].MensajesRecibidos = append(servidor.Usuarios[i].MensajesRecibidos, *msg)
+			err := gob.NewEncoder(aux).Encode(msg)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+
 }
 
 func main() {
